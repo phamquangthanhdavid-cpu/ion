@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b1220">
+    <meta name="description" content="Mô phỏng tương tác liên kết ion và liên kết cộng hóa trị dành cho học sinh KHTN 7 – THCS Hà Huy Tập.">
+    <title>Khám phá liên kết hóa học | KHTN 7 – THCS Hà Huy Tập</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            --page: #080f1c;
+            --surface: #101b2c;
+            --surface-soft: #142238;
+            --border: #26374e;
+            --muted: #9eafc5;
+            --text: #f4f7fb;
+            --amber: #fbbf24;
+            --cyan: #67e8f9;
+            --green: #34d399;
+        }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(ellipse at top, #12243a 0%, var(--page) 48rem);
+            color: var(--text);
+            overscroll-behavior-y: contain;
+        }
+        button { font: inherit; }
+        .hidden { display: none !important; }
+        button:focus-visible, canvas:focus-visible { outline: 3px solid #fbbf24; outline-offset: 3px; }
+        .skip-link {
+            position: fixed; left: 12px; top: -80px; z-index: 100;
+            padding: 10px 14px; border-radius: 10px;
+            background: #fff; color: #111827; font-weight: 700;
+        }
+        .skip-link { visibility: hidden; }
+        .skip-link:focus { top: 10px; visibility: visible; }
+        .site-header {
+            position: sticky; top: 0; z-index: 30;
+            background: rgba(9, 17, 30, .92); backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(148, 163, 184, .14);
+        }
+        .topbar {
+            width: min(1160px, calc(100% - 36px)); min-height: 62px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .brand-mark {
+            display: grid; place-items: center; width: 40px; height: 40px; flex: 0 0 40px;
+            border-radius: 13px; color: #fde68a; font-weight: 800; font-size: 12px;
+            background: rgba(245, 158, 11, .13); border: 1px solid rgba(245, 158, 11, .35);
+        }
+        .brand-title { font-size: 13px; font-weight: 800; letter-spacing: .04em; color: #f8fafc; }
+        .brand-subtitle { margin-top: 2px; color: var(--muted); font-size: 11px; }
+        .reset-button {
+            min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 0 14px; border-radius: 12px; color: #dbe5f1; background: #172438;
+            border: 1px solid #33445b; font-size: 13px; font-weight: 700; cursor: pointer;
+            transition: background .18s, transform .18s;
+        }
+        .reset-button:hover { background: #22334b; }
+        .reset-button:active { transform: scale(.98); }
+        #btnResetMobile { display: none; }
+        .main-shell { width: min(1160px, calc(100% - 36px)); margin: 0 auto; padding: 34px 0 44px; }
+        .hero {
+            position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 28px;
+            padding: clamp(22px, 4vw, 38px); margin-bottom: 22px;
+            border: 1px solid rgba(148, 163, 184, .18); border-radius: 24px;
+            background: linear-gradient(115deg, rgba(22, 43, 67, .96), rgba(14, 25, 42, .96));
+            box-shadow: 0 18px 48px rgba(0,0,0,.16);
+        }
+        .hero::after {
+            content: ''; position: absolute; width: 250px; height: 250px; right: 9%; top: -145px;
+            border-radius: 50%; border: 1px solid rgba(103,232,249,.12); box-shadow: 0 0 0 30px rgba(103,232,249,.025), 0 0 0 60px rgba(103,232,249,.02);
+            pointer-events: none;
+        }
+        .hero-copy { max-width: 730px; position: relative; z-index: 1; }
+        .eyebrow { display: inline-flex; align-items: center; gap: 8px; color: #fcd34d; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+        .eyebrow-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 12px rgba(251,191,36,.7); }
+        .hero h1 { margin: 13px 0 8px; font-size: clamp(28px, 4vw, 42px); line-height: 1.13; letter-spacing: -.035em; color: #fff; }
+        .hero-lead { margin: 0; max-width: 650px; color: #c3d0e0; font-size: 15px; line-height: 1.7; }
+        .hero-note { margin-top: 16px; color: #9fb1c7; font-size: 12px; }
+        .hero-actions { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: stretch; min-width: 190px; gap: 9px; }
+        .primary-cta {
+            min-height: 50px; display: inline-flex; justify-content: center; align-items: center; gap: 10px;
+            padding: 0 20px; border: 0; border-radius: 14px; background: #fbbf24; color: #191407;
+            font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 8px 24px rgba(245,158,11,.2);
+            transition: transform .18s, background .18s, box-shadow .18s;
+        }
+        .primary-cta:hover { background: #fcd34d; box-shadow: 0 10px 28px rgba(245,158,11,.28); transform: translateY(-1px); }
+        .primary-cta:active { transform: translateY(0) scale(.99); }
+        .hero-actions small { text-align: center; color: #9fb1c7; font-size: 11px; line-height: 1.5; }
+        .selection-grid { display: grid; grid-template-columns: minmax(280px, .85fr) minmax(0, 1.4fr); gap: 18px; margin-bottom: 22px; }
+        .step-card, .simulation-card, .summary-card {
+            background: rgba(15, 27, 44, .92); border: 1px solid rgba(148, 163, 184, .16);
+            border-radius: 20px; box-shadow: 0 12px 34px rgba(0,0,0,.12);
+        }
+        .step-card { padding: 21px; min-width: 0; }
+        .step-heading { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+        .step-number { display: grid; place-items: center; width: 30px; height: 30px; flex: 0 0 30px; border-radius: 10px; background: #23354d; color: #fcd34d; font-size: 13px; font-weight: 800; }
+        .step-heading h2 { margin: 0; color: #f8fafc; font-size: 16px; line-height: 1.35; }
+        .step-heading p { margin: 4px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+        .mode-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .mode-button {
+            width: 100%; min-height: 76px; display: flex; align-items: center; gap: 12px; text-align: left;
+            padding: 13px 14px; border-radius: 14px; border: 1px solid #2c405a; background: #111f33;
+            color: #e5edf7; cursor: pointer; transition: .18s ease;
+        }
+        .mode-button:hover { background: #1a2b43; border-color: #58708e; }
+        .mode-button[aria-pressed="true"] { border-color: #e7a91c; background: rgba(180, 112, 10, .17); box-shadow: inset 0 0 0 1px rgba(251,191,36,.14); }
+        .mode-button.covalent[aria-pressed="true"] { border-color: #22b7cf; background: rgba(8, 145, 178, .15); box-shadow: inset 0 0 0 1px rgba(103,232,249,.12); }
+        .mode-icon { display: grid; place-items: center; width: 40px; height: 40px; flex: 0 0 40px; border-radius: 12px; color: #fcd34d; background: rgba(251,191,36,.12); }
+        .mode-button.covalent .mode-icon { color: #67e8f9; background: rgba(103,232,249,.1); }
+        .mode-copy strong { display: block; font-size: 14px; }
+        .mode-copy small { display: block; margin-top: 4px; color: #9fb1c7; font-size: 11px; line-height: 1.4; }
+        .choice-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 13px; }
+        .choice-header span { color: #9fb1c7; font-size: 12px; }
+        #moleculeSelector { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+        .molecule-option {
+            min-width: 0; min-height: 74px; padding: 10px 11px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+            gap: 5px; border-radius: 13px; border: 1px solid #2b3d54; background: #111f33; color: #e5edf7;
+            text-align: left; cursor: pointer; transition: .18s ease;
+        }
+        .molecule-option:hover { border-color: #7186a0; background: #1b2c43; transform: translateY(-1px); }
+        .molecule-option[aria-pressed="true"] { border-color: #edb32d; background: rgba(180,112,10,.18); box-shadow: inset 0 0 0 1px rgba(251,191,36,.12); }
+        .molecule-option .formula { color: #fff; font-size: 16px; font-weight: 800; letter-spacing: .01em; }
+        .molecule-option .name { display: block; overflow: hidden; max-width: 100%; color: #b5c3d5; font-size: 11px; line-height: 1.4; text-overflow: ellipsis; }
+        .molecule-option .sub { display: block; color: #8ea2ba; font-size: 11px; line-height: 1.4; }
+        .simulation-card { padding: clamp(15px, 2.6vw, 24px); margin-bottom: 22px; scroll-margin-top: 86px; }
+        .simulation-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 15px; }
+        .simulation-heading h2 { margin: 0; font-size: 19px; color: #fff; }
+        .simulation-heading p { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+        #statusBadge { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; white-space: normal; text-align: center; max-width: 240px; padding: 7px 12px; border: 1px solid #3a4c64; border-radius: 999px; background: #172438; color: #d4deeb; font-size: 11px; font-weight: 800; }
+        #statusBadge.status-ionic { color: #fcd34d; background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.32); }
+        #statusBadge.status-covalent { color: #a5f3fc; background: rgba(6,182,212,.12); border-color: rgba(6,182,212,.32); }
+        #statusBadge.status-complete { color: #6ee7b7; background: rgba(16,185,129,.13); border-color: rgba(52,211,153,.38); }
+        .summary-card.is-complete { border-color: rgba(52,211,153,.48); box-shadow: 0 12px 34px rgba(16,185,129,.07); }
+        .instruction-box {
+            display: flex; align-items: flex-start; gap: 11px; padding: 12px 14px; margin-bottom: 13px;
+            border: 1px solid rgba(245,158,11,.28); border-radius: 13px; background: rgba(120, 78, 12, .14); color: #fde68a;
+        }
+        .instruction-icon { display: grid; place-items: center; width: 28px; height: 28px; flex: 0 0 28px; border-radius: 9px; background: rgba(251,191,36,.16); font-weight: 900; }
+        #instructionText { font-size: 13px; line-height: 1.55; font-weight: 600; }
+        .canvas-shell {
+            position: relative; width: 100%; height: clamp(330px, 46vw, 455px); overflow: hidden;
+            border: 1px solid #2b3b52; border-radius: 17px; background: #0c1727;
+        }
+        #chemCanvas { display: block; width: 100%; height: 100%; touch-action: none; }
+        .canvas-hint {
+            display: flex; align-items: center; gap: 8px; margin-top: 12px; color: #a9bad0; font-size: 12px; line-height: 1.5;
+        }
+        .canvas-hint strong { color: #fcd34d; }
+        .legend { display: flex; flex-wrap: wrap; gap: 9px 18px; margin-top: 13px; padding-top: 12px; border-top: 1px solid rgba(148,163,184,.13); }
+        .legend-item { display: inline-flex; align-items: center; gap: 8px; color: #afbed0; font-size: 12px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 10px; }
+        #feedbackToast { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); max-width: calc(100% - 24px); white-space: normal; text-align: center; z-index: 10; }
+        .toast-message { padding: 10px 15px; border: 1px solid transparent; border-radius: 999px; font-size: 12px; line-height: 1.45; font-weight: 700; box-shadow: 0 12px 32px rgba(0,0,0,.28); backdrop-filter: blur(12px); }
+        .toast-error { color: #ffe4e6; background: rgba(190,24,93,.86); border-color: rgba(251,113,133,.65); }
+        .toast-success { color: #d1fae5; background: rgba(5,120,85,.9); border-color: rgba(52,211,153,.65); }
+        .toast-info { color: #fef3c7; background: rgba(146,92,11,.92); border-color: rgba(251,191,36,.62); }
+        .summary-card { padding: clamp(16px, 2.6vw, 24px); }
+        .summary-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid rgba(148,163,184,.14); }
+        .summary-heading h2 { margin: 0; color: #f8fafc; font-size: 17px; }
+        .summary-heading p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+        .secondary-cta { min-height: 42px; padding: 0 14px; border: 1px solid rgba(52,211,153,.45); border-radius: 12px; background: rgba(16,185,129,.12); color: #a7f3d0; font-size: 12px; font-weight: 800; cursor: pointer; transition: background .18s, transform .18s; }
+        .secondary-cta:hover { background: rgba(16,185,129,.22); }
+        .secondary-cta:active { transform: scale(.98); }
+        .summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 11px; }
+        .summary-item { min-height: 106px; padding: 14px; border-radius: 13px; border: 1px solid #293a51; background: rgba(7, 16, 29, .62); }
+        .summary-item span { display: block; margin-bottom: 9px; color: #9fb1c7; font-size: 12px; font-weight: 600; }
+        .summary-item div { color: #eaf1fa; font-size: 13px; line-height: 1.6; font-weight: 600; overflow-wrap: anywhere; }
+        #valCol2 { color: #a5f3fc !important; }
+        #valCol3 { color: #fcd34d !important; font-size: 15px !important; }
+        .footer-note { padding: 22px 0 4px; color: #71839b; font-size: 11px; text-align: center; line-height: 1.6; }
+        .simulation-focus { animation: focusPulse 1.2s ease; }
+        @keyframes focusPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(251,191,36,0); } 35% { box-shadow: 0 0 0 5px rgba(251,191,36,.18); } }
+        @media (min-width: 980px) { .mode-grid { grid-template-columns: 1fr; } #moleculeSelector { grid-template-columns: repeat(5, minmax(0,1fr)); } }
+        @media (max-width: 760px) {
+            .main-shell { padding-top: 21px; }
+            .hero { align-items: flex-start; flex-direction: column; gap: 19px; }
+            .hero-actions { width: 100%; max-width: 360px; }
+            .selection-grid { grid-template-columns: 1fr; }
+            .mode-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+            .mode-button { align-items: flex-start; flex-direction: column; min-height: 112px; }
+            #moleculeSelector { grid-template-columns: repeat(3, minmax(0,1fr)); }
+            .summary-grid { grid-template-columns: 1fr; }
+            .summary-item { min-height: auto; }
+        }
+        @media (max-width: 480px) {
+            .topbar, .main-shell { width: min(100% - 24px, 1160px); }
+            .topbar { min-height: 58px; }
+            .brand-title { font-size: 11px; }
+            .brand-subtitle { font-size: 10px; }
+            #btnResetDesktop { display: none; }
+            #btnResetMobile { display: inline-flex; min-height: 38px; padding: 0 11px; }
+            .hero { padding: 21px 18px; border-radius: 19px; }
+            .hero h1 { font-size: 29px; }
+            .hero-lead { font-size: 13px; }
+            .step-card { padding: 16px; }
+            .mode-grid { grid-template-columns: 1fr; }
+            .mode-button { flex-direction: row; min-height: 72px; }
+            #moleculeSelector { grid-template-columns: repeat(2, minmax(0,1fr)); }
+            .molecule-option { min-height: 68px; }
+            .simulation-heading { align-items: flex-start; flex-direction: column; }
+            #statusBadge { max-width: none; }
+            .canvas-shell { height: 340px; }
+            .legend { gap: 9px 13px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#simulationSection">Bỏ qua phần giới thiệu, đến mô phỏng</a>
+    <header class="site-header">
+        <div class="topbar">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">KHTN 7</div>
+                <div>
+                    <div class="brand-title">TRƯỜNG THCS HÀ HUY TẬP</div>
+                    <div class="brand-subtitle">Không gian học tập tương tác · Khoa học tự nhiên</div>
+                </div>
+            </div>
+            <div class="reset-buttons">
+                <button id="btnResetMobile" class="reset-button" type="button" aria-label="Làm lại mô phỏng">
+                    <span aria-hidden="true">↻</span> Làm lại
+                </button>
+                <button id="btnResetDesktop" class="reset-button" type="button" aria-label="Làm lại mô phỏng">
+                    <span aria-hidden="true">↻</span> Làm lại
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-shell">
+        <section class="hero" aria-labelledby="pageTitle">
+            <div class="hero-copy">
+                <div class="eyebrow"><span class="eyebrow-dot"></span> KHOA HỌC TỰ NHIÊN · LỚP 7</div>
+                <h1 id="pageTitle">Khám phá liên kết hóa học</h1>
+                <p class="hero-lead">Tìm hiểu cách các nguyên tử tạo liên kết ion và liên kết cộng hóa trị thông qua mô phỏng electron trực quan, có thể kéo thả.</p>
+                <div class="hero-note">Quan sát · Thử nghiệm · Rút ra kiến thức</div>
+            </div>
+            <div class="hero-actions">
+                <button id="btnStart" class="primary-cta" type="button">
+                    <span aria-hidden="true">▶</span> Bắt đầu mô phỏng
+                </button>
+                <small>Mặc định bắt đầu với NaCl – liên kết ion.<br>Bạn có thể đổi chất bất cứ lúc nào.</small>
+            </div>
+        </section>
+
+        <div class="selection-grid">
+            <section class="step-card" aria-labelledby="modeHeading">
+                <div class="step-heading">
+                    <span class="step-number">01</span>
+                    <div>
+                        <h2 id="modeHeading">Chọn dạng liên kết</h2>
+                        <p>Chọn nội dung bạn muốn khám phá.</p>
+                    </div>
+                </div>
+                <div class="mode-grid" role="group" aria-label="Chọn dạng liên kết">
+                    <button id="tabIon" class="mode-button" type="button" aria-pressed="true">
+                        <span class="mode-icon" aria-hidden="true">⇄</span>
+                        <span class="mode-copy"><strong>Liên kết ion</strong><small>Kim loại nhường, phi kim nhận electron.</small></span>
+                    </button>
+                    <button id="tabCovalent" class="mode-button covalent" type="button" aria-pressed="false">
+                        <span class="mode-icon" aria-hidden="true">⟷</span>
+                        <span class="mode-copy"><strong>Liên kết cộng hóa trị</strong><small>Các nguyên tử dùng chung electron.</small></span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="step-card" aria-labelledby="substanceHeading">
+                <div class="step-heading">
+                    <span class="step-number">02</span>
+                    <div>
+                        <h2 id="substanceHeading">Chọn chất mô phỏng</h2>
+                        <p id="selectorHint">Chọn một hợp chất để bắt đầu quan sát sự nhường – nhận electron.</p>
+                    </div>
+                </div>
+                <div class="choice-header">
+                    <span id="selectorHeading">Các ví dụ liên kết ion</span>
+                    <span>Chọn để đổi mô phỏng</span>
+                </div>
+                <div id="moleculeSelector" aria-label="Danh sách chất mô phỏng"></div>
+            </section>
+        </div>
+
+        <section id="simulationSection" class="simulation-card" aria-labelledby="simulationHeading">
+            <div class="simulation-heading">
+                <div>
+                    <div class="eyebrow"><span class="eyebrow-dot"></span> 03 · THỰC HÀNH TƯƠNG TÁC</div>
+                    <h2 id="simulationHeading">Khu vực mô phỏng</h2>
+                    <p>Kéo các electron được đánh dấu vào vị trí phù hợp để tạo liên kết.</p>
+                </div>
+                <span id="statusBadge" class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700" role="status" aria-live="polite">Đang chuẩn bị...</span>
+            </div>
+
+            <div id="instructionBanner" class="instruction-box" aria-live="polite">
+                <span class="instruction-icon" aria-hidden="true">✦</span>
+                <span id="instructionText">Kéo 1 electron lớp ngoài cùng của Na thả vào ô trống trên lớp vỏ của Cl.</span>
+            </div>
+
+            <div class="canvas-shell" id="canvasShell">
+                <canvas id="chemCanvas" tabindex="0" role="img" aria-label="Mô phỏng tương tác cấu tạo nguyên tử và electron. Kéo các electron màu vàng đến vị trí được đánh dấu."></canvas>
+                <div id="feedbackToast" class="hidden px-4 py-2 rounded-full text-xs sm:text-sm font-semibold backdrop-blur-md shadow-xl transition-all" role="status" aria-live="polite"></div>
+            </div>
+            <div class="canvas-hint"><span aria-hidden="true">ⓘ</span><span><strong>Cách thao tác:</strong> Kéo chấm electron màu vàng đến vòng tròn/vùng giao thoa được đánh dấu. Thả sai vị trí thì electron sẽ trở về chỗ cũ.</span></div>
+            <div class="legend" aria-label="Chú giải màu sắc electron">
+                <span class="legend-item"><i class="legend-dot" style="background:#fbbf24"></i> Electron có thể kéo</span>
+                <span class="legend-item"><i class="legend-dot" style="background:#38bdf8"></i> Electron lớp ngoài cùng khác</span>
+                <span class="legend-item"><i class="legend-dot" style="background:#64748b"></i> Electron lớp trong</span>
+                <span class="legend-item"><i class="legend-dot" style="background:#34d399"></i> Electron đã đặt đúng</span>
+            </div>
+        </section>
+
+        <section id="summaryCard" class="summary-card" aria-labelledby="summaryHeading">
+            <div class="summary-heading">
+                <div>
+                    <div class="eyebrow"><span class="eyebrow-dot"></span> 04 · GHI NHỚ</div>
+                    <h2 id="summaryHeading">Kết quả và kiến thức</h2>
+                    <p>Nội dung được cập nhật theo chất và tiến độ mô phỏng.</p>
+                </div>
+                <button id="btnNextSubstance" class="secondary-cta hidden" type="button">Thử chất tiếp theo →</button>
+            </div>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <span id="labelCol1">1. Sự cho và nhận electron</span>
+                    <div id="valCol1">Thực hiện mô phỏng để xem quá trình electron.</div>
+                </div>
+                <div class="summary-item">
+                    <span id="labelCol2">2. Bản chất liên kết</span>
+                    <div id="valCol2">Quan sát sự tương tác giữa các nguyên tử.</div>
+                </div>
+                <div class="summary-item">
+                    <span id="labelCol3">3. Công thức hóa học</span>
+                    <div id="valCol3">NaCl</div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer-note">Tài liệu mô phỏng hỗ trợ học tập môn Khoa học tự nhiên lớp 7 · THCS Hà Huy Tập</footer>
+    </main>
+
+    <script>
+        /**
+         * ỨNG DỤNG MÔ PHỎNG LIÊN KẾT ION & CỘNG HÓA TRỊ (KHTN 7)
+         * Tối ưu hóa cho cảm ứng đa điểm / Pointer Events trên điện thoại, máy tính bảng và PC.
+         */
+        (function () {
+            // --- 1. DỮ LIỆU CÁC CHẤT TRONG SGK KHTN 7 ---
+            const IONIC_DATA = {
+                NaCl: {
+                    id: 'NaCl',
+                    name: 'Natri chloride',
+                    formula: 'NaCl',
+                    sub: 'Na + Cl → Na⁺Cl⁻',
+                    instruction: 'Kéo 1 electron lớp ngoài cùng của Na thả vào ô trống trên lớp vỏ của Cl',
+                    atoms: [
+                        { id: 'Na', symbol: 'Na', protons: '+11', shells: [2, 8, 1], role: 'metal', chargeText: 'Na⁺', finalShells: [2, 8], color: '#f59e0b', relX: -0.26, relY: 0.04 },
+                        { id: 'Cl', symbol: 'Cl', protons: '+17', shells: [2, 8, 7], role: 'nonmetal', chargeText: 'Cl⁻', finalShells: [2, 8, 8], color: '#10b981', relX: 0.26, relY: 0.04 }
+                    ],
+                    slots: [
+                        { id: 'slot_Cl_1', targetAtomId: 'Cl', angle: Math.PI, filledBy: null }
+                    ],
+                    summary: {
+                        col1: 'Na nhường 1e → Na⁺ (2, 8); Cl nhận 1e → Cl⁻ (2, 8, 8)',
+                        col2: 'Lực hút tĩnh điện giữa ion dương Na⁺ và ion âm Cl⁻',
+                        col3: 'NaCl (Natri chloride)'
+                    }
+                },
+                MgO: {
+                    id: 'MgO',
+                    name: 'Magnesium oxide',
+                    formula: 'MgO',
+                    sub: 'Mg + O → Mg²⁺O²⁻',
+                    instruction: 'Kéo lần lượt 2 electron lớp ngoài cùng của Mg thả vào 2 ô trống trên vỏ O',
+                    atoms: [
+                        { id: 'Mg', symbol: 'Mg', protons: '+12', shells: [2, 8, 2], role: 'metal', chargeText: 'Mg²⁺', finalShells: [2, 8], color: '#f59e0b', relX: -0.26, relY: 0.04 },
+                        { id: 'O', symbol: 'O', protons: '+8', shells: [2, 6], role: 'nonmetal', chargeText: 'O²⁻', finalShells: [2, 8], color: '#38bdf8', relX: 0.26, relY: 0.04 }
+                    ],
+                    slots: [
+                        { id: 'slot_O_1', targetAtomId: 'O', angle: Math.PI * 0.78, filledBy: null },
+                        { id: 'slot_O_2', targetAtomId: 'O', angle: Math.PI * 1.22, filledBy: null }
+                    ],
+                    summary: {
+                        col1: 'Mg nhường 2e → Mg²⁺ (2, 8); O nhận 2e → O²⁻ (2, 8)',
+                        col2: 'Lực hút tĩnh điện giữa ion dương Mg²⁺ và ion âm O²⁻',
+                        col3: 'MgO (Magnesium oxide)'
+                    }
+                },
+                CaCl2: {
+                    id: 'CaCl2',
+                    name: 'Calcium chloride',
+                    formula: 'CaCl₂',
+                    sub: 'Ca + 2Cl → Ca²⁺ + 2Cl⁻',
+                    instruction: 'Kéo 2 electron lớp ngoài cùng của Ca chia đều vào ô trống của 2 nguyên tử Cl',
+                    atoms: [
+                        { id: 'Cl1', symbol: 'Cl', protons: '+17', shells: [2, 8, 7], role: 'nonmetal', chargeText: 'Cl⁻', finalShells: [2, 8, 8], color: '#10b981', relX: -0.34, relY: 0.06 },
+                        { id: 'Ca', symbol: 'Ca', protons: '+20', shells: [2, 8, 8, 2], role: 'metal', chargeText: 'Ca²⁺', finalShells: [2, 8, 8], color: '#f59e0b', relX: 0.0, relY: 0.06 },
+                        { id: 'Cl2', symbol: 'Cl', protons: '+17', shells: [2, 8, 7], role: 'nonmetal', chargeText: 'Cl⁻', finalShells: [2, 8, 8], color: '#10b981', relX: 0.34, relY: 0.06 }
+                    ],
+                    slots: [
+                        { id: 'slot_Cl1_1', targetAtomId: 'Cl1', angle: 0, filledBy: null },
+                        { id: 'slot_Cl2_1', targetAtomId: 'Cl2', angle: Math.PI, filledBy: null }
+                    ],
+                    summary: {
+                        col1: 'Ca nhường 2e → Ca²⁺; mỗi nguyên tử Cl nhận 1e → 2 ion Cl⁻',
+                        col2: 'Lực hút tĩnh điện giữa 1 ion Ca²⁺ và 2 ion Cl⁻',
+                        col3: 'CaCl₂ (Calcium chloride)'
+                    }
+                }
+            };
+
+            const COVALENT_DATA = {
+                H2: {
+                    id: 'H2',
+                    name: 'Khí Hydrogen',
+                    formula: 'H₂',
+                    sub: 'Liên kết đơn (H–H)',
+                    instruction: 'Kéo electron độc thân của mỗi nguyên tử H vào vùng giao thoa ở giữa để dùng chung',
+                    atoms: [
+                        { id: 'H1', symbol: 'H', protons: '+1', innerShells: [], valenceTotal: 1, contribCount: 1, targetOctet: 2, color: '#38bdf8', relX: -0.15, relY: 0.05 },
+                        { id: 'H2', symbol: 'H', protons: '+1', innerShells: [], valenceTotal: 1, contribCount: 1, targetOctet: 2, color: '#38bdf8', relX: 0.15, relY: 0.05 }
+                    ],
+                    zones: [
+                        { id: 'zone_H_H', atomA: 'H1', atomB: 'H2', pairs: 1, slots: [] }
+                    ],
+                    summary: {
+                        electronFormula: 'H : H',
+                        structuralFormula: 'H – H (1 liên kết đơn)',
+                        molecularFormula: 'H₂ (Dùng chung 1 cặp electron)'
+                    }
+                },
+                Cl2: {
+                    id: 'Cl2',
+                    name: 'Khí Chlorine',
+                    formula: 'Cl₂',
+                    sub: 'Liên kết đơn (Cl–Cl)',
+                    instruction: 'Mỗi nguyên tử Cl góp 1 electron vào vùng giao thoa ở giữa tạo 1 cặp electron dùng chung',
+                    atoms: [
+                        { id: 'Cl1', symbol: 'Cl', protons: '+17', innerShells: [2, 8], valenceTotal: 7, contribCount: 1, targetOctet: 8, color: '#10b981', relX: -0.18, relY: 0.05 },
+                        { id: 'Cl2', symbol: 'Cl', protons: '+17', innerShells: [2, 8], valenceTotal: 7, contribCount: 1, targetOctet: 8, color: '#10b981', relX: 0.18, relY: 0.05 }
+                    ],
+                    zones: [
+                        { id: 'zone_Cl_Cl', atomA: 'Cl1', atomB: 'Cl2', pairs: 1, slots: [] }
+                    ],
+                    summary: {
+                        electronFormula: ':Cl : Cl: (mỗi Cl còn 3 cặp e riêng)',
+                        structuralFormula: 'Cl – Cl (1 liên kết đơn)',
+                        molecularFormula: 'Cl₂ (Dùng chung 1 cặp electron)'
+                    }
+                },
+                H2O: {
+                    id: 'H2O',
+                    name: 'Nước',
+                    formula: 'H₂O',
+                    sub: '2 liên kết đơn (H–O–H)',
+                    instruction: 'Kéo electron góp chung của O và 2 nguyên tử H vào 2 vùng giao thoa hai bên',
+                    atoms: [
+                        { id: 'H1', symbol: 'H', protons: '+1', innerShells: [], valenceTotal: 1, contribCount: 1, targetOctet: 2, color: '#38bdf8', relX: -0.27, relY: 0.06 },
+                        { id: 'O', symbol: 'O', protons: '+8', innerShells: [2], valenceTotal: 6, contribCount: 2, targetOctet: 8, color: '#f43f5e', relX: 0.0, relY: 0.06 },
+                        { id: 'H2', symbol: 'H', protons: '+1', innerShells: [], valenceTotal: 1, contribCount: 1, targetOctet: 2, color: '#38bdf8', relX: 0.27, relY: 0.06 }
+                    ],
+                    zones: [
+                        { id: 'zone_H1_O', atomA: 'H1', atomB: 'O', pairs: 1, slots: [] },
+                        { id: 'zone_O_H2', atomA: 'O', atomB: 'H2', pairs: 1, slots: [] }
+                    ],
+                    summary: {
+                        electronFormula: 'H : O : H (O còn 2 cặp e riêng)',
+                        structuralFormula: 'H – O – H (2 liên kết đơn)',
+                        molecularFormula: 'H₂O (Dùng chung 2 cặp electron)'
+                    }
+                },
+                CO2: {
+                    id: 'CO2',
+                    name: 'Carbon dioxide',
+                    formula: 'CO₂',
+                    sub: '2 liên kết đôi (O=C=O)',
+                    instruction: 'C góp 4e, mỗi O góp 2e vào 2 vùng giao thoa để tạo 2 liên kết đôi O=C=O',
+                    atoms: [
+                        { id: 'O1', symbol: 'O', protons: '+8', innerShells: [2], valenceTotal: 6, contribCount: 2, targetOctet: 8, color: '#f43f5e', relX: -0.30, relY: 0.06 },
+                        { id: 'C', symbol: 'C', protons: '+6', innerShells: [2], valenceTotal: 4, contribCount: 4, targetOctet: 8, color: '#a855f7', relX: 0.0, relY: 0.06 },
+                        { id: 'O2', symbol: 'O', protons: '+8', innerShells: [2], valenceTotal: 6, contribCount: 2, targetOctet: 8, color: '#f43f5e', relX: 0.30, relY: 0.06 }
+                    ],
+                    zones: [
+                        { id: 'zone_O1_C', atomA: 'O1', atomB: 'C', pairs: 2, slots: [] },
+                        { id: 'zone_C_O2', atomA: 'C', atomB: 'O2', pairs: 2, slots: [] }
+                    ],
+                    summary: {
+                        electronFormula: ':O :: C :: O: (mỗi O còn 2 cặp e riêng)',
+                        structuralFormula: 'O = C = O (2 liên kết đôi)',
+                        molecularFormula: 'CO₂ (Dùng chung 4 cặp electron)'
+                    }
+                },
+                N2: {
+                    id: 'N2',
+                    name: 'Khí Nitrogen',
+                    formula: 'N₂',
+                    sub: 'Liên kết ba (N≡N)',
+                    instruction: 'Kéo 3 electron độc thân của mỗi nguyên tử N vào vùng giao thoa ở giữa tạo 3 cặp e dùng chung',
+                    atoms: [
+                        { id: 'N1', symbol: 'N', protons: '+7', innerShells: [2], valenceTotal: 5, contribCount: 3, targetOctet: 8, color: '#6366f1', relX: -0.18, relY: 0.05 },
+                        { id: 'N2', symbol: 'N', protons: '+7', innerShells: [2], valenceTotal: 5, contribCount: 3, targetOctet: 8, color: '#6366f1', relX: 0.18, relY: 0.05 }
+                    ],
+                    zones: [
+                        { id: 'zone_N_N', atomA: 'N1', atomB: 'N2', pairs: 3, slots: [] }
+                    ],
+                    summary: {
+                        electronFormula: ':N ⋮⋮ N: (mỗi N còn 1 cặp e riêng)',
+                        structuralFormula: 'N ≡ N (1 liên kết ba bền vững)',
+                        molecularFormula: 'N₂ (Dùng chung 3 cặp electron)'
+                    }
+                }
+            };
+
+            // --- 2. TRẠNG THÁI ỨNG DỤNG ---
+            const state = {
+                mode: 'ionic',          // 'ionic' | 'covalent'
+                selectedKey: 'NaCl',    // Khóa chất đang chọn
+                isComplete: false,      // Đã hoàn thành chuyển / góp electron chưa
+                bondProgress: 0,        // Hiệu ứng hút tĩnh điện (0 -> 1) khi liên kết ion hoàn tất
+                atoms: [],              // Danh sách nguyên tử đã tính tọa độ thực tế
+                electrons: [],          // Danh sách tất cả các hạt electron (cả lớp trong & hóa trị)
+                slots: [],              // Các ô trống nhận electron (Tab Ion)
+                zones: [],              // Các vùng giao thoa dùng chung (Tab Cộng hóa trị)
+                draggingElectron: null, // Electron đang được kéo
+                dragOffset: { x: 0, y: 0 },
+                toastTimer: null
+            };
+
+            // --- 3. DOM REFERENCES ---
+            const canvas = document.getElementById('chemCanvas');
+            const ctx = canvas.getContext('2d');
+            const tabIon = document.getElementById('tabIon');
+            const tabCovalent = document.getElementById('tabCovalent');
+            const btnResetMobile = document.getElementById('btnResetMobile');
+            const btnResetDesktop = document.getElementById('btnResetDesktop');
+            const moleculeSelector = document.getElementById('moleculeSelector');
+            const instructionText = document.getElementById('instructionText');
+            const feedbackToast = document.getElementById('feedbackToast');
+            const summaryCard = document.getElementById('summaryCard');
+            const statusBadge = document.getElementById('statusBadge');
+            const labelCol1 = document.getElementById('labelCol1');
+            const labelCol2 = document.getElementById('labelCol2');
+            const labelCol3 = document.getElementById('labelCol3');
+            const valCol1 = document.getElementById('valCol1');
+            const valCol2 = document.getElementById('valCol2');
+            const valCol3 = document.getElementById('valCol3');
+
+            let canvasWidth = 0;
+            let canvasHeight = 0;
+            let animFrameId = null;
+
+            // --- 4. HÀM HIỂN THỊ THÔNG BÁO PHẢN HỒI NHANH ---
+            function showToast(message, type = 'info') {
+                if (state.toastTimer) clearTimeout(state.toastTimer);
+                feedbackToast.textContent = message;
+                const toastType = ['error', 'success'].includes(type) ? type : 'info';
+                feedbackToast.className = `toast-message toast-${toastType}`;
+
+                state.toastTimer = setTimeout(() => {
+                    feedbackToast.classList.add('hidden');
+                }, 2600);
+            }
+
+            // --- 5. KHỞI TẠO CÁC NÚT CHỌN PHÂN TỬ ---
+            function renderMoleculeButtons() {
+                const dataset = state.mode === 'ionic' ? IONIC_DATA : COVALENT_DATA;
+                moleculeSelector.innerHTML = '';
+                const selectorHeading = document.getElementById('selectorHeading');
+                const selectorHint = document.getElementById('selectorHint');
+                if (selectorHeading) {
+                    selectorHeading.textContent = state.mode === 'ionic'
+                        ? 'Các ví dụ liên kết ion'
+                        : 'Các ví dụ liên kết cộng hóa trị';
+                }
+                if (selectorHint) {
+                    selectorHint.textContent = state.mode === 'ionic'
+                        ? 'Chọn một hợp chất để quan sát sự nhường – nhận electron.'
+                        : 'Chọn một phân tử để quan sát các nguyên tử dùng chung electron.';
+                }
+
+                Object.values(dataset).forEach((item) => {
+                    const isActive = state.selectedKey === item.id;
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'molecule-option';
+                    btn.setAttribute('aria-pressed', String(isActive));
+                    btn.setAttribute('aria-label', `Chọn ${item.formula}, ${item.name}, ${item.sub}`);
+                    btn.innerHTML = `
+                        <span class="formula">${item.formula}</span>
+                        <span class="name">${item.name}</span>
+                        <span class="sub">${item.sub}</span>
+                    `;
+                    btn.addEventListener('click', () => {
+                        state.selectedKey = item.id;
+                        renderMoleculeButtons();
+                        initScenario();
+                    });
+                    moleculeSelector.appendChild(btn);
+                });
+            }
+
+            // --- 6. TÍNH TOÁN BỐ CỤC TỌA ĐỘ NGUYÊN TỬ & ELECTRON ---
+            function getShellRadius(shellIndex, totalShells, baseUnit) {
+                // Bán kính lõi hạt nhân ~ 18-22px, mỗi lớp vỏ cách nhau khoảng 18-24px
+                return baseUnit * (1.25 + shellIndex * 0.78);
+            }
+
+            function initScenario() {
+                state.isComplete = false;
+                state.bondProgress = 0;
+                state.draggingElectron = null;
+                state.atoms = [];
+                state.electrons = [];
+                state.slots = [];
+                state.zones = [];
+
+                const cx = canvasWidth / 2;
+                const cy = canvasHeight / 2 + 12;
+                const isMobile = canvasWidth < 640;
+
+                if (state.mode === 'ionic') {
+                    const data = IONIC_DATA[state.selectedKey];
+                    instructionText.textContent = data.instruction;
+
+                    // Đơn vị tỉ lệ bán kính vỏ nguyên tử co giãn theo màn hình
+                    const maxAtoms = data.atoms.length;
+                    const baseUnit = isMobile
+                        ? (maxAtoms === 3 ? 12.5 : 15.5)
+                        : (maxAtoms === 3 ? 17.5 : 21);
+
+                    // Tạo nguyên tử
+                    data.atoms.forEach((a) => {
+                        const x = cx + a.relX * canvasWidth;
+                        const y = cy + a.relY * canvasHeight;
+                        const outerIndex = a.shells.length - 1;
+                        const outerR = getShellRadius(outerIndex, a.shells.length, baseUnit);
+                        const prevR = outerIndex > 0 ? getShellRadius(outerIndex - 1, a.shells.length, baseUnit) : baseUnit * 1.1;
+
+                        state.atoms.push({
+                            ...a,
+                            baseX: x,
+                            baseY: y,
+                            x,
+                            y,
+                            baseUnit,
+                            outerR,
+                            prevR
+                        });
+                    });
+
+                    // Tạo các ô trống (slots) trên lớp vỏ ngoài cùng của phi kim
+                    data.slots.forEach((s) => {
+                        const targetAtom = state.atoms.find(at => at.id === s.targetAtomId);
+                        const sx = targetAtom.x + Math.cos(s.angle) * targetAtom.outerR;
+                        const sy = targetAtom.y + Math.sin(s.angle) * targetAtom.outerR;
+                        state.slots.push({
+                            ...s,
+                            x: sx,
+                            y: sy,
+                            filledBy: null
+                        });
+                    });
+
+                    // Tạo các hạt electron cho từng nguyên tử
+                    state.atoms.forEach((atom) => {
+                        atom.shells.forEach((count, shellIdx) => {
+                            const isOuter = shellIdx === atom.shells.length - 1;
+                            const r = getShellRadius(shellIdx, atom.shells.length, atom.baseUnit);
+
+                            // Sắp xếp góc phân bố electron (chừa vị trí slot trống đối với phi kim)
+                            const atomSlots = state.slots.filter(sl => sl.targetAtomId === atom.id);
+                            let angles = [];
+
+                            if (isOuter && atom.role === 'metal') {
+                                // Đặt electron hóa trị của kim loại hướng về phía phi kim để học sinh dễ kéo
+                                if (atom.id === 'Ca') {
+                                    angles = [Math.PI, 0]; // 1 bên trái hướng Cl1, 1 bên phải hướng Cl2
+                                } else if (count === 1) {
+                                    angles = [0]; // Hướng sang phải về phía Cl
+                                } else {
+                                    angles = [-0.25, 0.25]; // Hướng sang phải về phía O
+                                }
+                            } else if (isOuter && atom.role === 'nonmetal') {
+                                // 8 vị trí chuẩn theo cặp trên - dưới - trái - phải
+                                const standard8 = [
+                                    -Math.PI / 2 - 0.16, -Math.PI / 2 + 0.16,
+                                    Math.PI / 2 - 0.16, Math.PI / 2 + 0.16,
+                                    -0.16, 0.16,
+                                    Math.PI - 0.16, Math.PI + 0.16
+                                ];
+                                // Mỗi slot chỉ thay thế đúng 1 electron trong 8 vị trí chuẩn.
+                                // Không lọc theo ngưỡng góc vì có thể xóa cả một cặp electron.
+                                const availableAngles = [...standard8];
+                                atomSlots.forEach((slot) => {
+                                    let nearestIndex = -1;
+                                    let nearestDistance = Infinity;
+
+                                    availableAngles.forEach((ang, index) => {
+                                        const delta = Math.atan2(
+                                            Math.sin(ang - slot.angle),
+                                            Math.cos(ang - slot.angle)
+                                        );
+                                        const distance = Math.abs(delta);
+                                        if (distance < nearestDistance) {
+                                            nearestDistance = distance;
+                                            nearestIndex = index;
+                                        }
+                                    });
+
+                                    if (nearestIndex !== -1) {
+                                        availableAngles.splice(nearestIndex, 1);
+                                    }
+                                });
+
+                                angles = availableAngles.slice(0, count);
+                            } else {
+                                for (let i = 0; i < count; i++) {
+                                    angles.push((i * 2 * Math.PI) / count - Math.PI / 2);
+                                }
+                            }
+
+                            angles.forEach((ang, idx) => {
+                                const ex = atom.x + Math.cos(ang) * r;
+                                const ey = atom.y + Math.sin(ang) * r;
+                                const isDraggable = isOuter && atom.role === 'metal';
+
+                                state.electrons.push({
+                                    id: `${atom.id}_s${shellIdx}_e${idx}`,
+                                    atomId: atom.id,
+                                    shellIdx,
+                                    isOuter,
+                                    isDraggable,
+                                    homeX: ex,
+                                    homeY: ey,
+                                    x: ex,
+                                    y: ey,
+                                    relAngle: ang,
+                                    relR: r,
+                                    assignedSlotId: null,
+                                    assignedZoneSlot: null
+                                });
+                            });
+                        });
+                    });
+
+                } else {
+                    // --- TAB 2: LIÊN KẾT CỘNG HÓA TRỊ ---
+                    const data = COVALENT_DATA[state.selectedKey];
+                    instructionText.textContent = data.instruction;
+
+                    const maxAtoms = data.atoms.length;
+                    const baseUnit = isMobile
+                        ? (maxAtoms === 3 ? 13.5 : 17)
+                        : (maxAtoms === 3 ? 18.5 : 23);
+
+                    data.atoms.forEach((a) => {
+                        const x = cx + a.relX * canvasWidth;
+                        const y = cy + a.relY * canvasHeight;
+                        const outerIdx = a.innerShells.length;
+                        const outerR = a.innerShells.length === 0
+                            ? baseUnit * 1.95
+                            : getShellRadius(outerIdx, outerIdx + 1, baseUnit);
+
+                        state.atoms.push({
+                            ...a,
+                            baseX: x,
+                            baseY: y,
+                            x,
+                            y,
+                            baseUnit,
+                            outerR
+                        });
+                    });
+
+                    // Tạo các vùng giao thoa (zones) và các ô chứa cặp electron dùng chung bên trong
+                    data.zones.forEach((z) => {
+                        const aA = state.atoms.find(at => at.id === z.atomA);
+                        const aB = state.atoms.find(at => at.id === z.atomB);
+                        const zx = (aA.x + aB.x) / 2;
+                        const zy = (aA.y + aB.y) / 2;
+
+                        const zoneSlots = [];
+                        const totalDots = z.pairs * 2;
+                        const rowSpacing = 14;
+                        const colSpacing = 12;
+
+                        for (let p = 0; p < z.pairs; p++) {
+                            const offsetY = (p - (z.pairs - 1) / 2) * rowSpacing;
+                            // Cặp 2 hạt (trái của nguyên tử A, phải của nguyên tử B)
+                            zoneSlots.push({
+                                id: `${z.id}_p${p}_left`,
+                                zoneId: z.id,
+                                ownerAtomId: aA.id,
+                                x: zx - colSpacing / 2,
+                                y: zy + offsetY,
+                                filledBy: null
+                            });
+                            zoneSlots.push({
+                                id: `${z.id}_p${p}_right`,
+                                zoneId: z.id,
+                                ownerAtomId: aB.id,
+                                x: zx + colSpacing / 2,
+                                y: zy + offsetY,
+                                filledBy: null
+                            });
+                        }
+
+                        state.zones.push({
+                            ...z,
+                            x: zx,
+                            y: zy,
+                            rx: isMobile ? 22 : 28,
+                            ry: Math.max(isMobile ? 28 : 34, z.pairs * 15 + 14),
+                            slots: zoneSlots
+                        });
+                    });
+
+                    // Tạo các hạt electron cho từng nguyên tử cộng hóa trị
+                    state.atoms.forEach((atom, atomIdx) => {
+                        // 1. Electron lớp trong (không kéo được)
+                        atom.innerShells.forEach((count, sIdx) => {
+                            const r = getShellRadius(sIdx, atom.innerShells.length + 1, atom.baseUnit);
+                            for (let i = 0; i < count; i++) {
+                                const ang = (i * 2 * Math.PI) / count - Math.PI / 2;
+                                state.electrons.push({
+                                    id: `${atom.id}_in_${sIdx}_${i}`,
+                                    atomId: atom.id,
+                                    isOuter: false,
+                                    isDraggable: false,
+                                    x: atom.x + Math.cos(ang) * r,
+                                    y: atom.y + Math.sin(ang) * r
+                                });
+                            }
+                        });
+
+                        // 2. Electron lớp ngoài cùng: chia thành electron góp chung (kéo được) & electron riêng
+                        const rOuter = atom.outerR;
+                        const contribCount = atom.contribCount;
+                        const loneCount = atom.valenceTotal - contribCount;
+
+                        // Xác định hướng về vùng giao thoa để đặt electron góp chung ở rìa gần vùng giao thoa
+                        const connectedZones = state.zones.filter(z => z.atomA === atom.id || z.atomB === atom.id);
+
+                        let contribAngles = [];
+                        if (connectedZones.length === 1) {
+                            const z = connectedZones[0];
+                            const baseAng = Math.atan2(z.y - atom.y, z.x - atom.x);
+                            for (let i = 0; i < contribCount; i++) {
+                                const spread = (i - (contribCount - 1) / 2) * 0.34;
+                                contribAngles.push(baseAng + spread);
+                            }
+                        } else if (connectedZones.length === 2) {
+                            // Nguyên tử trung tâm (O trong H2O hoặc C trong CO2): chia đều sang trái (PI) và phải (0)
+                            const half = contribCount / 2;
+                            for (let i = 0; i < half; i++) {
+                                const spread = (i - (half - 1) / 2) * 0.34;
+                                contribAngles.push(Math.PI + spread); // Hướng trái
+                                contribAngles.push(0 + spread);       // Hướng phải
+                            }
+                        }
+
+                        contribAngles.forEach((ang, idx) => {
+                            const ex = atom.x + Math.cos(ang) * rOuter;
+                            const ey = atom.y + Math.sin(ang) * rOuter;
+                            state.electrons.push({
+                                id: `${atom.id}_val_contrib_${idx}`,
+                                atomId: atom.id,
+                                isOuter: true,
+                                isDraggable: true,
+                                homeX: ex,
+                                homeY: ey,
+                                x: ex,
+                                y: ey,
+                                assignedZoneSlot: null
+                            });
+                        });
+
+                        // Electron hóa trị không tham gia góp chung (cặp e riêng)
+                        if (loneCount > 0) {
+                            let loneAngles = [];
+                            if (connectedZones.length === 1) {
+                                const z = connectedZones[0];
+                                const awayAng = Math.atan2(atom.y - z.y, atom.x - z.x);
+                                // Xếp thành từng cặp ở phía đối diện
+                                const pairs = Math.floor(loneCount / 2);
+                                const baseCenters = pairs === 3
+                                    ? [awayAng - Math.PI / 2, awayAng, awayAng + Math.PI / 2]
+                                    : pairs === 2
+                                        ? [awayAng - Math.PI / 2, awayAng + Math.PI / 2]
+                                        : [awayAng];
+                                baseCenters.forEach((cAng) => {
+                                    loneAngles.push(cAng - 0.16, cAng + 0.16);
+                                });
+                            } else {
+                                // Nguyên tử trung tâm O (có 4e riêng = 2 cặp ở cực trên và cực dưới)
+                                loneAngles = [-Math.PI / 2 - 0.17, -Math.PI / 2 + 0.17, Math.PI / 2 - 0.17, Math.PI / 2 + 0.17];
+                            }
+
+                            loneAngles.slice(0, loneCount).forEach((ang, idx) => {
+                                state.electrons.push({
+                                    id: `${atom.id}_val_lone_${idx}`,
+                                    atomId: atom.id,
+                                    isOuter: true,
+                                    isDraggable: false,
+                                    x: atom.x + Math.cos(ang) * rOuter,
+                                    y: atom.y + Math.sin(ang) * rOuter
+                                });
+                            });
+                        }
+                    });
+                }
+
+                updateSummaryUI();
+            }
+
+            // --- 7. CẬP NHẬT BẢNG TÓM TẮT KIẾN THỨC ---
+            function updateSummaryUI() {
+                if (state.mode === 'ionic') {
+                    const data = IONIC_DATA[state.selectedKey];
+                    labelCol1.textContent = '1. Sự cho và nhận electron';
+                    labelCol2.textContent = '2. Bản chất liên kết';
+                    labelCol3.textContent = '3. Công thức hóa học';
+
+                    const filledCount = state.slots.filter(s => s.filledBy !== null).length;
+                    const totalSlots = state.slots.length;
+
+                    if (state.isComplete) {
+                        statusBadge.textContent = 'Đã đạt cấu hình khí hiếm bền vững ✓';
+                        statusBadge.className = 'status-pill status-complete';
+                        summaryCard.classList.add('is-complete');
+                        valCol1.textContent = data.summary.col1;
+                        valCol2.textContent = data.summary.col2;
+                        valCol3.textContent = data.summary.col3;
+                    } else {
+                        statusBadge.textContent = `Đã chuyển ${filledCount}/${totalSlots} electron`;
+                        statusBadge.className = 'status-pill status-ionic';
+                        summaryCard.classList.remove('is-complete');
+                        valCol1.textContent = `Đang chuyển electron hóa trị (${filledCount}/${totalSlots}e)...`;
+                        valCol2.textContent = 'Lực hút tĩnh điện giữa các ion mang điện tích trái dấu';
+                        valCol3.textContent = `${data.formula} (Chờ hoàn thành liên kết)`;
+                    }
+                } else {
+                    const data = COVALENT_DATA[state.selectedKey];
+                    labelCol1.textContent = '1. Công thức electron';
+                    labelCol2.textContent = '2. Công thức cấu tạo';
+                    labelCol3.textContent = '3. Công thức phân tử';
+
+                    let filledSlots = 0;
+                    let totalSlots = 0;
+                    state.zones.forEach(z => {
+                        totalSlots += z.slots.length;
+                        filledSlots += z.slots.filter(s => s.filledBy !== null).length;
+                    });
+
+                    if (state.isComplete) {
+                        statusBadge.textContent = 'Đạt lớp vỏ bền vững (Octet / Duet) ✓';
+                        statusBadge.className = 'status-pill status-complete';
+                        summaryCard.classList.add('is-complete');
+                        valCol1.textContent = data.summary.electronFormula;
+                        valCol2.textContent = data.summary.structuralFormula;
+                        valCol3.textContent = data.summary.molecularFormula;
+                    } else {
+                        statusBadge.textContent = `Đã góp ${filledSlots}/${totalSlots} electron dùng chung`;
+                        statusBadge.className = 'status-pill status-covalent';
+                        summaryCard.classList.remove('is-complete');
+                        valCol1.textContent = `Kéo đủ ${totalSlots} electron vào vùng giao thoa để xem`;
+                        valCol2.textContent = 'Dùng chung cặp electron giữa các nguyên tử phi kim';
+                        valCol3.textContent = `${data.formula} (Chờ góp đủ electron)`;
+                    }
+                }
+
+                const nextButton = document.getElementById('btnNextSubstance');
+                if (nextButton) {
+                    nextButton.classList.toggle('hidden', !state.isComplete);
+                    if (state.isComplete) {
+                        const keys = Object.keys(state.mode === 'ionic' ? IONIC_DATA : COVALENT_DATA);
+                        const isLast = keys.indexOf(state.selectedKey) === keys.length - 1;
+                        nextButton.textContent = isLast
+                            ? (state.mode === 'ionic' ? 'Khám phá liên kết cộng hóa trị →' : 'Quay lại liên kết ion →')
+                            : 'Thử chất tiếp theo →';
+                    }
+                }
+            }
+
+            // --- 8. VẼ ĐỒ HỌA TRÊN CANVAS ---
+            function drawScene() {
+                ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+                // Vẽ lưới nền khoa học tinh tế
+                ctx.save();
+                ctx.strokeStyle = 'rgba(148, 163, 184, 0.05)';
+                ctx.lineWidth = 1;
+                const grid = 28;
+                for (let x = 0; x < canvasWidth; x += grid) {
+                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvasHeight); ctx.stroke();
+                }
+                for (let y = 0; y < canvasHeight; y += grid) {
+                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvasWidth, y); ctx.stroke();
+                }
+                ctx.restore();
+
+                // Hiệu ứng hút tĩnh điện tiến lại gần nhau khi hoàn thành Liên kết Ion
+                if (state.mode === 'ionic' && state.isComplete) {
+                    if (state.bondProgress < 1) {
+                        state.bondProgress = Math.min(1, state.bondProgress + 0.045);
+                    }
+                    const pullFactor = 0.24 * state.bondProgress;
+                    const centerX = canvasWidth / 2;
+
+                    state.atoms.forEach((atom) => {
+                        const dx = (centerX - atom.baseX) * pullFactor;
+                        atom.x = atom.baseX + dx;
+                    });
+
+                    // Cập nhật lại tọa độ các electron & slot đi theo nguyên tử đang hút nhau
+                    state.slots.forEach((sl) => {
+                        const targetAtom = state.atoms.find(a => a.id === sl.targetAtomId);
+                        sl.x = targetAtom.x + Math.cos(sl.angle) * targetAtom.outerR;
+                        sl.y = targetAtom.y + Math.sin(sl.angle) * targetAtom.outerR;
+                    });
+
+                    state.electrons.forEach((el) => {
+                        if (el.assignedSlotId) {
+                            const sl = state.slots.find(s => s.id === el.assignedSlotId);
+                            el.x = sl.x;
+                            el.y = sl.y;
+                        } else if (!el.isDraggable) {
+                            const owner = state.atoms.find(a => a.id === el.atomId);
+                            el.x = owner.x + Math.cos(el.relAngle) * el.relR;
+                            el.y = owner.y + Math.sin(el.relAngle) * el.relR;
+                        }
+                    });
+                }
+
+                if (state.mode === 'ionic') {
+                    drawIonicScene();
+                } else {
+                    drawCovalentScene();
+                }
+
+                animFrameId = requestAnimationFrame(drawScene);
+            }
+
+            // Vẽ cảnh Liên kết Ion
+            function drawIonicScene() {
+                const time = performance.now() * 0.004;
+
+                // 1. Nếu đã hoàn thành, vẽ hiệu ứng lực hút tĩnh điện giữa các ion trái dấu
+                if (state.isComplete && state.bondProgress > 0.2) {
+                    ctx.save();
+                    const metalAtom = state.atoms.find(a => a.role === 'metal');
+                    const nonmetals = state.atoms.filter(a => a.role === 'nonmetal');
+
+                    nonmetals.forEach((nm) => {
+                        const midX = (metalAtom.x + nm.x) / 2;
+                        const midY = metalAtom.y;
+
+                        // Vầng hào quang liên kết
+                        const grad = ctx.createLinearGradient(metalAtom.x, midY, nm.x, midY);
+                        grad.addColorStop(0, 'rgba(251, 191, 36, 0.15)');
+                        grad.addColorStop(0.5, 'rgba(56, 189, 248, 0.35)');
+                        grad.addColorStop(1, 'rgba(16, 185, 129, 0.15)');
+                        ctx.strokeStyle = grad;
+                        ctx.lineWidth = 14;
+                        ctx.lineCap = 'round';
+                        ctx.beginPath();
+                        ctx.moveTo(metalAtom.x, midY);
+                        ctx.lineTo(nm.x, midY);
+                        ctx.stroke();
+
+                        // Nhãn "Lực hút tĩnh điện"
+                        ctx.fillStyle = '#7dd3fc';
+                        ctx.font = '700 11px Inter, sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('Lực hút tĩnh điện', midX, midY - metalAtom.outerR - 26);
+                    });
+                    ctx.restore();
+                }
+
+                // 2. Vẽ các lớp vỏ nguyên tử
+                state.atoms.forEach((atom) => {
+                    const shellsToDraw = (state.isComplete && atom.role === 'metal') ? atom.finalShells : atom.shells;
+
+                    shellsToDraw.forEach((_, idx) => {
+                        const r = getShellRadius(idx, atom.shells.length, atom.baseUnit);
+                        const isOutermost = idx === shellsToDraw.length - 1;
+
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.arc(atom.x, atom.y, r, 0, Math.PI * 2);
+                        ctx.strokeStyle = isOutermost
+                            ? (state.isComplete ? '#34d399' : 'rgba(148, 163, 184, 0.65)')
+                            : 'rgba(100, 116, 139, 0.35)';
+                        ctx.lineWidth = isOutermost ? 2 : 1.3;
+                        if (isOutermost && !state.isComplete && atom.role === 'metal') {
+                            ctx.setLineDash([5, 4]); // Vỏ ngoài của kim loại sắp mất đi
+                        }
+                        ctx.stroke();
+                        ctx.restore();
+                    });
+
+                    // Vẽ hạt nhân nguyên tử ở tâm
+                    ctx.save();
+                    const nucR = atom.baseUnit * 0.95;
+                    ctx.beginPath();
+                    ctx.arc(atom.x, atom.y, nucR, 0, Math.PI * 2);
+                    ctx.fillStyle = atom.role === 'metal' ? 'rgba(245, 158, 11, 0.25)' : 'rgba(16, 185, 129, 0.25)';
+                    ctx.fill();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = atom.color;
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = `800 ${Math.max(11, Math.round(nucR * 0.72))}px Inter, sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(atom.protons, atom.x, atom.y);
+
+                    // Nhãn tên nguyên tử hoặc ký hiệu Ion bên dưới
+                    const displayR = (state.isComplete && atom.role === 'metal') ? atom.prevR : atom.outerR;
+                    ctx.font = '800 15px Inter, sans-serif';
+                    ctx.fillStyle = state.isComplete ? '#34d399' : '#f8fafc';
+                    const bottomLabel = state.isComplete ? `Ion ${atom.chargeText}` : `Nguyên tử ${atom.symbol}`;
+                    ctx.fillText(bottomLabel, atom.x, atom.y + displayR + 22);
+
+                    // Hiển thị cấu hình electron (ví dụ: 2, 8, 1 -> 2, 8)
+                    const cfgText = `(${shellsToDraw.join(', ')})`;
+                    ctx.font = '500 11px Inter, sans-serif';
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.fillText(cfgText, atom.x, atom.y + displayR + 38);
+                    ctx.restore();
+                });
+
+                // 3. Vẽ các ô trống nhận electron (slots) trên phi kim
+                state.slots.forEach((sl) => {
+                    if (sl.filledBy !== null) return;
+                    const pulse = 1 + Math.sin(time * 1.6) * 0.15;
+
+                    ctx.save();
+                    // Vùng sáng gợi ý thả
+                    ctx.beginPath();
+                    ctx.arc(sl.x, sl.y, 14 * pulse, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(52, 211, 153, 0.18)';
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(sl.x, sl.y, 8, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#34d399';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([3, 3]);
+                    ctx.stroke();
+                    ctx.restore();
+                });
+
+                // 4. Vẽ tất cả hạt electron
+                state.electrons.forEach((el) => {
+                    const isDraggingThis = state.draggingElectron && state.draggingElectron.id === el.id;
+                    drawElectronDot(el.x, el.y, el.isDraggable, el.isOuter, isDraggingThis, el.assignedSlotId !== null, time);
+                });
+            }
+
+            // Vẽ cảnh Liên kết Cộng hóa trị
+            function drawCovalentScene() {
+                const time = performance.now() * 0.004;
+
+                // 1. Vẽ các vùng giao thoa dùng chung electron ở giữa các nguyên tử
+                state.zones.forEach((z) => {
+                    const filledCount = z.slots.filter(s => s.filledBy !== null).length;
+                    const isZoneFull = filledCount === z.slots.length;
+
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.ellipse(z.x, z.y, z.rx, z.ry, 0, 0, Math.PI * 2);
+                    ctx.fillStyle = isZoneFull
+                        ? 'rgba(52, 211, 153, 0.22)'
+                        : 'rgba(56, 189, 248, 0.12)';
+                    ctx.fill();
+
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = isZoneFull ? '#34d399' : 'rgba(56, 189, 248, 0.55)';
+                    ctx.setLineDash(isZoneFull ? [] : [4, 4]);
+                    ctx.stroke();
+
+                    // Vẽ các ô vị trí cặp electron bên trong vùng giao thoa
+                    z.slots.forEach((sl) => {
+                        if (sl.filledBy !== null) return;
+                        ctx.beginPath();
+                        ctx.arc(sl.x, sl.y, 5.5, 0, Math.PI * 2);
+                        ctx.strokeStyle = 'rgba(125, 211, 252, 0.75)';
+                        ctx.lineWidth = 1.5;
+                        ctx.setLineDash([2, 2]);
+                        ctx.stroke();
+                    });
+
+                    // Hiển thị nhãn loại liên kết khi hoàn thành vùng này
+                    if (isZoneFull) {
+                        const bondLabel = z.pairs === 1 ? '1 cặp e chung (–)' : (z.pairs === 2 ? '2 cặp e chung (=)' : '3 cặp e chung (≡)');
+                        ctx.fillStyle = '#6ee7b7';
+                        ctx.font = '700 10px Inter, sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(bondLabel, z.x, z.y - z.ry - 8);
+                    }
+                    ctx.restore();
+                });
+
+                // 2. Vẽ các lớp vỏ nguyên tử
+                state.atoms.forEach((atom) => {
+                    // Các lớp trong
+                    atom.innerShells.forEach((_, sIdx) => {
+                        const r = getShellRadius(sIdx, atom.innerShells.length + 1, atom.baseUnit);
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.arc(atom.x, atom.y, r, 0, Math.PI * 2);
+                        ctx.strokeStyle = 'rgba(100, 116, 139, 0.35)';
+                        ctx.lineWidth = 1.3;
+                        ctx.stroke();
+                        ctx.restore();
+                    });
+
+                    // Tính số electron hiện tại quanh nguyên tử này (electron riêng + electron trong vùng giao thoa)
+                    const ownOuterCount = atom.valenceTotal - atom.contribCount;
+                    let sharedCount = 0;
+                    state.zones.forEach((z) => {
+                        if (z.atomA === atom.id || z.atomB === atom.id) {
+                            sharedCount += z.slots.filter(s => s.filledBy !== null).length;
+                        }
+                    });
+                    const currentOctet = ownOuterCount + sharedCount;
+                    const reachedOctet = currentOctet >= atom.targetOctet;
+
+                    // Lớp vỏ ngoài cùng
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(atom.x, atom.y, atom.outerR, 0, Math.PI * 2);
+                    ctx.strokeStyle = reachedOctet ? '#34d399' : 'rgba(148, 163, 184, 0.65)';
+                    ctx.lineWidth = reachedOctet ? 2.4 : 1.8;
+                    ctx.stroke();
+                    ctx.restore();
+
+                    // Hạt nhân nguyên tử
+                    ctx.save();
+                    const nucR = atom.baseUnit * 0.92;
+                    ctx.beginPath();
+                    ctx.arc(atom.x, atom.y, nucR, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(99, 102, 241, 0.25)';
+                    ctx.fill();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = atom.color;
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = `800 ${Math.max(11, Math.round(nucR * 0.72))}px Inter, sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(atom.symbol, atom.x, atom.y);
+
+                    // Bộ đếm quy tắc Octet (2e với H, 8e với C, N, O, Cl) bên dưới
+                    ctx.font = '700 12px Inter, sans-serif';
+                    ctx.fillStyle = reachedOctet ? '#34d399' : '#cbd5e1';
+                    ctx.fillText(`${atom.symbol}: ${currentOctet}/${atom.targetOctet}e`, atom.x, atom.y + atom.outerR + 20);
+                    ctx.restore();
+                });
+
+                // 3. Vẽ tất cả electron
+                state.electrons.forEach((el) => {
+                    const isDraggingThis = state.draggingElectron && state.draggingElectron.id === el.id;
+                    const isPlaced = el.assignedZoneSlot !== null;
+                    drawElectronDot(el.x, el.y, el.isDraggable, el.isOuter, isDraggingThis, isPlaced, time);
+                });
+            }
+
+            // Hàm vẽ từng hạt electron sắc nét, có hào quang gợi ý cho hạt kéo được
+            function drawElectronDot(x, y, isDraggable, isOuter, isDragging, isPlaced, time) {
+                ctx.save();
+
+                if (isDraggable && !isPlaced) {
+                    // Hào quang nhấp nháy giúp học sinh nhận diện hạt kéo được
+                    const haloR = isDragging ? 18 : 13 + Math.sin(time * 1.8) * 2;
+                    ctx.beginPath();
+                    ctx.arc(x, y, haloR, 0, Math.PI * 2);
+                    ctx.fillStyle = isDragging ? 'rgba(251, 191, 36, 0.35)' : 'rgba(251, 191, 36, 0.22)';
+                    ctx.fill();
+                }
+
+                const dotR = isDragging ? 7.5 : (isDraggable ? 6 : (isOuter ? 4.8 : 3.8));
+                ctx.beginPath();
+                ctx.arc(x, y, dotR, 0, Math.PI * 2);
+
+                if (isPlaced) {
+                    ctx.fillStyle = '#34d399';
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.5;
+                } else if (isDraggable) {
+                    ctx.fillStyle = '#fbbf24';
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.6;
+                } else if (isOuter) {
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = 1;
+                } else {
+                    ctx.fillStyle = '#64748b';
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = 1;
+                }
+
+                ctx.fill();
+                ctx.stroke();
+
+                // Dấu "-" nhỏ bên trong electron hóa trị để tăng tính trực quan
+                if (isDraggable || isPlaced) {
+                    ctx.fillStyle = '#0f172a';
+                    ctx.font = '800 10px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('e', x, y + 0.5);
+                }
+
+                ctx.restore();
+            }
+
+            // --- 9. XỬ LÝ TƯƠNG TÁC POINTER EVENTS (KÉO THẢ & CHẠM) ---
+            function getPointerPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                return {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+            }
+
+            // Thử tự động đưa electron vào ô đích (hỗ trợ cả kéo thả lẫn chạm nhanh trên điện thoại)
+            function trySnapElectron(el, dropX, dropY) {
+                if (state.mode === 'ionic') {
+                    // Tìm ô trống gần nhất trên phi kim
+                    let bestSlot = null;
+                    let bestDist = Infinity;
+
+                    state.slots.forEach((sl) => {
+                        if (sl.filledBy !== null) return;
+                        const d = Math.hypot(dropX - sl.x, dropY - sl.y);
+                        if (d < bestDist) {
+                            bestDist = d;
+                            bestSlot = sl;
+                        }
+                    });
+
+                    // Cho phép thả trong bán kính rộng (52px) hoặc nếu chỉ chạm nhẹ (cách vị trí cũ < 8px) thì tự bay sang ô trống
+                    const movedDist = Math.hypot(dropX - el.homeX, dropY - el.homeY);
+                    if (bestSlot && (bestDist <= 56 || movedDist < 8)) {
+                        bestSlot.filledBy = el.id;
+                        el.assignedSlotId = bestSlot.id;
+                        el.x = bestSlot.x;
+                        el.y = bestSlot.y;
+
+                        // Kiểm tra đã chuyển hết electron chưa
+                        if (state.slots.every(s => s.filledBy !== null)) {
+                            state.isComplete = true;
+                            showToast('Tuyệt vời! Hai ion trái dấu hút nhau tạo thành liên kết ion.', 'success');
+                        } else {
+                            showToast('Chính xác! Tiếp tục chuyển electron còn lại.', 'info');
+                        }
+                        updateSummaryUI();
+                        return true;
+                    }
+                } else {
+                    // Tab Cộng hóa trị: tìm ô trống phù hợp trong vùng giao thoa
+                    let bestZoneSlot = null;
+                    let bestDist = Infinity;
+
+                    state.zones.forEach((z) => {
+                        if (z.atomA !== el.atomId && z.atomB !== el.atomId) return;
+                        z.slots.forEach((sl) => {
+                            if (sl.filledBy !== null) return;
+                            // Ưu tiên ô thuộc phía nguyên tử đang kéo, hoặc ô bất kỳ trong vùng giao thoa
+                            const d = Math.hypot(dropX - sl.x, dropY - sl.y);
+                            const ownerBonus = sl.ownerAtomId === el.atomId ? -12 : 0;
+                            if (d + ownerBonus < bestDist) {
+                                bestDist = d + ownerBonus;
+                                bestZoneSlot = sl;
+                            }
+                        });
+                    });
+
+                    const movedDist = Math.hypot(dropX - el.homeX, dropY - el.homeY);
+                    if (bestZoneSlot && (bestDist <= 58 || movedDist < 8)) {
+                        bestZoneSlot.filledBy = el.id;
+                        el.assignedZoneSlot = bestZoneSlot.id;
+                        el.x = bestZoneSlot.x;
+                        el.y = bestZoneSlot.y;
+
+                        // Kiểm tra tất cả vùng giao thoa đã đủ cặp e chưa
+                        const allDone = state.zones.every(z => z.slots.every(s => s.filledBy !== null));
+                        if (allDone) {
+                            state.isComplete = true;
+                            showToast('Hoàn thành! Các nguyên tử đã đạt lớp vỏ bền vững của khí hiếm.', 'success');
+                        }
+                        updateSummaryUI();
+                        return true;
+                    }
+                }
+
+                // Không trúng đích -> trả electron về vị trí ban đầu trên vỏ nguyên tử
+                el.x = el.homeX;
+                el.y = el.homeY;
+                return false;
+            }
+
+            canvas.addEventListener('pointerdown', (e) => {
+                if (state.isComplete) return;
+                const pos = getPointerPos(e);
+
+                // 1. Kiểm tra có chạm vào electron kéo được (vùng chạm lớn 30px cho ngón tay)
+                let targetEl = null;
+                let minDist = 30;
+
+                state.electrons.forEach((el) => {
+                    if (!el.isDraggable) return;
+                    if (el.assignedSlotId || el.assignedZoneSlot) return;
+                    const d = Math.hypot(pos.x - el.x, pos.y - el.y);
+                    if (d < minDist) {
+                        minDist = d;
+                        targetEl = el;
+                    }
+                });
+
+                if (targetEl) {
+                    state.draggingElectron = targetEl;
+                    state.dragOffset.x = targetEl.x - pos.x;
+                    state.dragOffset.y = targetEl.y - pos.y;
+                    canvas.setPointerCapture(e.pointerId);
+                    return;
+                }
+
+                // 2. Nếu học sinh chạm nhầm vào electron lớp trong hoặc electron riêng -> nhắc nhẹ kiến thức
+                const innerHit = state.electrons.find(el => !el.isDraggable && Math.hypot(pos.x - el.x, pos.y - el.y) < 18);
+                if (innerHit) {
+                    if (!innerHit.isOuter) {
+                        showToast('Chỉ electron lớp ngoài cùng mới tham gia tạo liên kết!', 'error');
+                    } else if (state.mode === 'ionic') {
+                        showToast('Nguyên tử phi kim nhận thêm electron chứ không nhường electron!', 'error');
+                    } else {
+                        showToast('Cặp electron này đã ghép đôi ổn định, hãy kéo electron độc thân!', 'error');
+                    }
+                }
+            });
+
+            canvas.addEventListener('pointermove', (e) => {
+                const pos = getPointerPos(e);
+
+                if (state.draggingElectron) {
+                    state.draggingElectron.x = Math.max(16, Math.min(canvasWidth - 16, pos.x + state.dragOffset.x));
+                    state.draggingElectron.y = Math.max(16, Math.min(canvasHeight - 16, pos.y + state.dragOffset.y));
+                    return;
+                }
+
+                // Đổi con trỏ chuột khi di qua electron kéo được
+                const hoverDraggable = !state.isComplete && state.electrons.some(el =>
+                    el.isDraggable && !el.assignedSlotId && !el.assignedZoneSlot && Math.hypot(pos.x - el.x, pos.y - el.y) < 26
+                );
+                canvas.style.cursor = hoverDraggable ? 'grab' : 'default';
+            });
+
+            function finishDrag(e) {
+                if (!state.draggingElectron) return;
+                const el = state.draggingElectron;
+                state.draggingElectron = null;
+
+                if (e && e.pointerId !== undefined) {
+                    try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+                }
+                trySnapElectron(el, el.x, el.y);
+            }
+
+            // Chỉ pointerup mới được tính là thao tác thả electron.
+            // pointercancel là thao tác bị hủy (ví dụ hệ điều hành ngắt cảm ứng),
+            // vì vậy phải đưa electron về vị trí cũ thay vì tự động ghép liên kết.
+            function cancelDrag(e) {
+                if (!state.draggingElectron) return;
+
+                const el = state.draggingElectron;
+                state.draggingElectron = null;
+
+                if (e && e.pointerId !== undefined) {
+                    try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+                }
+
+                el.x = el.homeX;
+                el.y = el.homeY;
+            }
+
+            canvas.addEventListener('pointerup', finishDrag);
+            canvas.addEventListener('pointercancel', cancelDrag);
+
+            // --- 10. CHUYỂN TAB & CO GIÃN RESPONSIVE ---
+            function switchMode(newMode) {
+                if (state.mode === newMode) return;
+                state.mode = newMode;
+                state.selectedKey = newMode === 'ionic' ? 'NaCl' : 'H2';
+
+                // Trạng thái giao diện được điều khiển bằng aria-pressed để giữ nguyên CSS của nút.
+                tabIon.setAttribute('aria-pressed', String(newMode === 'ionic'));
+                tabCovalent.setAttribute('aria-pressed', String(newMode === 'covalent'));
+
+                renderMoleculeButtons();
+                initScenario();
+            }
+
+            tabIon.addEventListener('click', () => switchMode('ionic'));
+            tabCovalent.addEventListener('click', () => switchMode('covalent'));
+
+            const btnStart = document.getElementById('btnStart');
+            btnStart.addEventListener('click', () => {
+                const simulationSection = document.getElementById('simulationSection');
+                simulationSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                simulationSection.classList.remove('simulation-focus');
+                // Kích hoạt lại hiệu ứng viền để chỉ vị trí thao tác đầu tiên.
+                requestAnimationFrame(() => simulationSection.classList.add('simulation-focus'));
+                canvas.focus({ preventScroll: true });
+                showToast('Bắt đầu nhé! Hãy kéo electron màu vàng đến vị trí được đánh dấu.', 'info');
+            });
+
+            document.getElementById('btnNextSubstance').addEventListener('click', () => {
+                const dataset = state.mode === 'ionic' ? IONIC_DATA : COVALENT_DATA;
+                const keys = Object.keys(dataset);
+                const currentIndex = keys.indexOf(state.selectedKey);
+
+                if (currentIndex < keys.length - 1) {
+                    state.selectedKey = keys[currentIndex + 1];
+                    renderMoleculeButtons();
+                    initScenario();
+                } else {
+                    switchMode(state.mode === 'ionic' ? 'covalent' : 'ionic');
+                }
+
+                document.getElementById('substanceHeading').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+
+            btnResetMobile.addEventListener('click', () => {
+                initScenario();
+                showToast('Đã đặt lại trạng thái ban đầu.', 'info');
+            });
+            btnResetDesktop.addEventListener('click', () => {
+                initScenario();
+                showToast('Đã đặt lại trạng thái ban đầu.', 'info');
+            });
+
+            function resizeCanvas() {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+
+                canvasWidth = rect.width;
+                canvasHeight = rect.height;
+
+                canvas.width = Math.round(canvasWidth * dpr);
+                canvas.height = Math.round(canvasHeight * dpr);
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+                initScenario();
+            }
+
+            window.addEventListener('resize', resizeCanvas);
+            window.addEventListener('load', () => {
+                renderMoleculeButtons();
+                resizeCanvas();
+                if (!animFrameId) {
+                    animFrameId = requestAnimationFrame(drawScene);
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
